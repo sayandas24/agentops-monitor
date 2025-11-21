@@ -18,7 +18,7 @@ def create_trace(db: Session, project_id: UUID, trace_data: TraceCreate) -> Trac
         project_id=project_id,
         start_time=trace_data.start_time,
         end_time=trace_data.end_time,
-        metadata=trace_data.metadata,
+        meta=trace_data.meta,
         tags=trace_data.tags
     )
     
@@ -49,7 +49,7 @@ def create_span(db: Session, span_data: SpanCreate) -> Span:
         duration_ms=duration_ms,
         inputs=span_data.inputs,
         outputs=span_data.outputs,
-        metadata=span_data.metadata,
+        meta=span_data.meta,
         error=span_data.error
     )
     

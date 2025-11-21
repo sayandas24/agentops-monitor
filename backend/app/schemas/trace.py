@@ -17,7 +17,7 @@ class SpanCreate(BaseModel):
     end_time: Optional[datetime] = None
     inputs: Dict = {}
     outputs: Dict = {}
-    metadata: Dict = {}
+    meta: Dict = {}
     error: Optional[str] = None
 
 
@@ -42,7 +42,7 @@ class TraceCreate(BaseModel):
     name: str
     start_time: datetime
     end_time: Optional[datetime] = None
-    metadata: Dict = {}
+    meta: Dict = {}
     tags: List[str] = []
 
 
@@ -66,7 +66,7 @@ class TraceResponse(BaseModel):
     duration_ms: Optional[float]
     total_tokens: int
     total_cost: float
-    metadata: Dict
+    meta: Dict
     tags: List[str]
 
     class Config:

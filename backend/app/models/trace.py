@@ -27,8 +27,8 @@ class Trace(Base):
     total_tokens = Column(Integer, default=0)
     total_cost = Column(Float, default=0.0)
     
-    # Metadata
-    metadata = Column(JSON, default={})  # Store ADK-specific data
+    # meta
+    meta = Column(JSON, default={})  # Store ADK-specific data
     tags = Column(JSON, default=[])      # e.g., ["adk", "gemini", "a2a"]
     
     created_at = Column(DateTime, default=datetime.utcnow)

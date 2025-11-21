@@ -36,7 +36,7 @@ class Span(Base):
     # Data
     inputs = Column(JSON, default={})
     outputs = Column(JSON, default={})
-    metadata = Column(JSON, default={})  # Store ADK/A2A specific metadata
+    meta = Column(JSON, default={})  # Store ADK/A2A specific meta
     error = Column(Text, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
