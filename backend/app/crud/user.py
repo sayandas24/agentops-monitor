@@ -11,14 +11,11 @@ from uuid import UUID
 
 def create_user(db: Session, user: UserCreate) -> User:
     """Create new user account"""
-    print("***raw user data***", user)
-
     db_user = User(
         email=user.email,
         hashed_password=hash_password(user.password),
         full_name=user.full_name,
     )
-    print("***user data received***", db_user)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
