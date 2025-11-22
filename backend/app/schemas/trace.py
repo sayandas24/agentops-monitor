@@ -2,9 +2,10 @@
 What it does: Defines formats for trace/span data from SDK
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 from typing import Dict, List, Optional
 from datetime import datetime
+from uuid import UUID
 
 
 class SpanCreate(BaseModel):
@@ -57,7 +58,7 @@ class TraceIngest(BaseModel):
 
 
 class TraceResponse(BaseModel):
-    id: str
+    id: UUID
     trace_id: str
     name: str
     status: str
@@ -68,6 +69,10 @@ class TraceResponse(BaseModel):
     total_cost: float
     meta: Dict
     tags: List[str]
+
+    @field_serializer('id')
+    def serialize_id(self, value: UUID) -> str:
+        return str(value)
 
     class Config:
         from_attributes = True

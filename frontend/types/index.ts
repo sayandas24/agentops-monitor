@@ -23,7 +23,7 @@ export interface Trace {
   duration_ms: number | null
   total_tokens: number
   total_cost: number
-  metadata: {
+  meta: {
     adk?: {
       agent_type: string
       model: string
@@ -50,8 +50,10 @@ export interface Span {
   duration_ms: number | null
   inputs: any
   outputs: any
-  metadata: any
+  meta: any
   error: string | null
+  llm_call?: LLMCall
+  tool_call?: ToolCall
 }
 
 export interface LLMCall {

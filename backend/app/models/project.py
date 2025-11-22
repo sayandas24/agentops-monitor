@@ -17,7 +17,7 @@ class Project(Base):
     api_key = Column(String, unique=True, index=True, nullable=False)
     is_active = Column(Boolean, default=True)
     owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
     owner = relationship("User", back_populates="projects")

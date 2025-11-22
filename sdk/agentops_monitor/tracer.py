@@ -41,10 +41,15 @@ def end_trace(end_time=None, meta=None):
 def add_span(
     name, type, meta, parent_span_id=None, inputs=None, outputs=None, error=None
 ):
+    # Check if trace exists, if not return None (monitoring not active)
+    trace = get_trace()
+    if not trace:
+        return None
+    
     span_id = f"span_{uuid.uuid4().hex[:16]}"
     span = {
         "span_id": span_id,
-        "trace_id": get_trace()["trace_id"],
+        "trace_id": trace["trace_id"],
         "parent_span_id": parent_span_id,
         "name": name,
         "type": type,
@@ -61,6 +66,10 @@ def add_span(
 
 
 def end_span(span_id, outputs=None, error=None, meta=None):
+    # If span_id is None, monitoring wasn't active when span was created
+    if not span_id:
+        return
+    
     spans = get_spans()
     for span in spans:
         if span["span_id"] == span_id:

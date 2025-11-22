@@ -1,6 +1,6 @@
 # What it does: Captures tool usage throughout agent runs
 
-from google.adk.tools import Tool
+from google.adk.tools import BaseTool
 
 def wrap_tool(tool):
     original_call = tool.__call__

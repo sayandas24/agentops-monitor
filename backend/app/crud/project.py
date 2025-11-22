@@ -13,11 +13,13 @@ def generate_api_key() -> str:
 
 def create_project(db: Session, project: ProjectCreate, owner_id: UUID) -> Project:
     """Create new project with API key"""
+    from datetime import datetime
     db_project = Project(
         name=project.name,
         description=project.description,
         api_key=generate_api_key(),
-        owner_id=owner_id
+        owner_id=owner_id,
+        created_at=datetime.utcnow()
     )
     db.add(db_project)
     db.commit()
@@ -30,4 +32,15 @@ def get_project_by_api_key(db: Session, api_key: str) -> Project | None:
 
 def get_user_projects(db: Session, user_id: UUID) -> list[Project]:
     """Get all projects owned by user"""
-    return db.query(Project).filter(Project.owner_id == user_id).all()
+    from datetime import datetime
+    projects = db.query(Project).filter(Project.owner_id == user_id).all()
+    
+    # Fix any projects with NULL created_at (legacy data)
+    for project in projects:
+        if project.created_at is None:
+            project.created_at = datetime.utcnow()
+    
+    if projects:
+        db.commit()
+    
+    return projects
