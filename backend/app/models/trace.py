@@ -16,10 +16,10 @@ class Trace(Base):
     trace_id = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)  # e.g., "ResearchAgent_run"
     status = Column(String, default="running")  # running, success, failed
-    project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
+    project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False, index=True)
     
     # Timing
-    start_time = Column(DateTime, nullable=False)
+    start_time = Column(DateTime, nullable=False, index=True)
     end_time = Column(DateTime, nullable=True)
     duration_ms = Column(Float, nullable=True)
     

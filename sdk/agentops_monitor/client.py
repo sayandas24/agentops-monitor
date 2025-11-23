@@ -17,6 +17,7 @@ def send_trace(trace, spans, llm_calls, tool_calls, api_key):
     }
     print(f"\n=== AgentOps Monitor: Sending Trace ===")
     print(f"Trace ID: {trace.get('trace_id')}")
+    print(f"Trace Name: {trace.get('name')}")
     print(f"Spans: {len(spans)}")
     print(f"LLM Calls: {len(llm_calls)}")
     print(f"Tool Calls: {len(tool_calls)}")

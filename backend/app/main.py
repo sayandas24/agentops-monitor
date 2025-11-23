@@ -4,7 +4,7 @@ Starts server, connects routes, creates database tables in Supabase
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import auth, projects, traces
+from app.api import auth, projects, traces, analytics
 from app.database import Base, engine
 
 # Create all database tables in Supabase
@@ -32,6 +32,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(projects.router)
 app.include_router(traces.router)
+app.include_router(analytics.router)
 
 @app.get("/")
 def root():

@@ -8,9 +8,9 @@ import { formatDate, formatCost, getStatusColor } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LLMCallCard } from "@/components/LLMCallCard";
-import { ToolCallCard } from "@/components/ToolCallCard";
-import { TraceStats } from "@/components/TraceStats";
+import { LLMCallCard } from "@/components/smallComponents/LLMCallCard";
+import { ToolCallCard } from "@/components/smallComponents/ToolCallCard";
+import { TraceStats } from "@/components/smallComponents/TraceStats";
 import Link from "next/link";
 
 interface TraceDetail {
