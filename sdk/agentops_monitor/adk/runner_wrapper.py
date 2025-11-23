@@ -5,7 +5,6 @@ from google.adk.runners import Runner
 def monitor_runner(runner, api_key):
     from ..tracer import new_trace, end_trace, add_span, end_span
     from ..client import send_trace
-    from ..context import get_spans, get_calls
 
     class WrappedRunner(Runner):
         def __init__(self, *args, **kwargs):
@@ -21,17 +20,25 @@ def monitor_runner(runner, api_key):
             trace = new_trace(name="RunnerExecution", meta=meta, tags=["adk"])
             # Runner step span
             span_id = add_span("Runner.run", "runner_step", meta, inputs={"args": str(args)[:200]})
+            
             try:
-                result = super().run(*args, **kwargs)
-                end_span(span_id, outputs={"result": str(result)[:500]})
+                # Get the generator from super().run()
+                result_generator = super().run(*args, **kwargs)
+                
+                # Yield all events from the generator
+                for event in result_generator:
+                    yield event
+                
+                # After generator is exhausted, end the span
+                end_span(span_id, outputs={"completed": True})
+                
             except Exception as e:
                 end_span(span_id, error=str(e))
                 raise
             finally:
-                # fix End and upload
-                end_trace()
-                send_trace(trace, get_spans(), *get_calls(), api_key=self._api_key)
-            return result
+                # End and upload trace with all collected data
+                trace, spans, llm_calls, tool_calls = end_trace()
+                send_trace(trace, spans, llm_calls, tool_calls, api_key=self._api_key)
 
     # Get the app and session_service from the runner
     kwargs = {}

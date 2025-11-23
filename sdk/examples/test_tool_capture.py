@@ -9,6 +9,7 @@ import asyncio
 import os
 from dotenv import load_dotenv
 from agentops_monitor import monitor_agent, monitor_runner
+from agentops_monitor.adk.tool_wrapper import wrap_tool
 
 load_dotenv()
 AGENTOPS_API_KEY = os.getenv("AGENTOPS_API_KEY", "test_key")
@@ -16,11 +17,14 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 os.environ["AGENTOPS_API_URL"] = "http://localhost:8000"
 os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
 
+# Wrap the google_search tool
+wrapped_search = wrap_tool(google_search)
+
 search_agent = Agent(
     name="SearchAgent",
     model="gemini-2.5-flash",
-    tools=[google_search],
-    instruction="You are a specialist in Google Search."
+    tools=[wrapped_search],
+    instruction="You MUST use the google_search tool to answer questions. Always search before answering."
 )
 
 search_agent = monitor_agent(search_agent, AGENTOPS_API_KEY)
@@ -40,13 +44,18 @@ async def create_session():
 
 asyncio.run(create_session())
 
-test_prompt = "What is prime minister of India?"
+# Ask a question that requires a search
+test_prompt = "What is the latest news about Python 3.13?"
 message = types.Content(parts=[types.Part(text=test_prompt)], role="user")
+
+print(f"Testing tool capture with prompt: {test_prompt}\n")
 
 responses = []
 for event in runner.run(user_id=user_id, session_id=session_id, new_message=message):
     if hasattr(event, "content") and event.content:
         for part in event.content.parts:
             if hasattr(part, "text") and part.text:
-                print("Response:", part.text)
+                print("Response:", part.text[:200])
                 responses.append(part.text)
+
+print("\nTest complete!")

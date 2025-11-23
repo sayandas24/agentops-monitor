@@ -8,6 +8,9 @@ import { formatDate, formatCost, getStatusColor } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { LLMCallCard } from "@/components/LLMCallCard";
+import { ToolCallCard } from "@/components/ToolCallCard";
+import { TraceStats } from "@/components/TraceStats";
 import Link from "next/link";
 
 interface TraceDetail {
@@ -30,6 +33,7 @@ export default function TraceDetailPage() {
       setError(null);
       try {
         const data = await tracesAPI.getDetail(traceId);
+        console.log(data, "data")
         setTraceDetail(data);
       } catch (err: any) {
         setError(err.message || "Failed to load trace details");
@@ -81,30 +85,13 @@ export default function TraceDetailPage() {
 
       {/* Trace Summary Card */}
       <Card className="p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Trace Summary</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Status</p>
-            <Badge className={getStatusColor(trace.status)}>
-              {trace.status.toUpperCase()}
-            </Badge>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Duration</p>
-            <p className="font-semibold">
-              {trace.duration_ms ? `${(trace.duration_ms / 1000).toFixed(2)}s` : "N/A"}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Total Tokens</p>
-            <p className="font-semibold">{trace.total_tokens}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Total Cost</p>
-            <p className="font-semibold">{formatCost(trace.total_cost)}</p>
-          </div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Trace Summary</h2>
+          <Badge className={getStatusColor(trace.status)}>
+            {trace.status.toUpperCase()}
+          </Badge>
         </div>
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <p className="text-sm text-muted-foreground">Started</p>
             <p>{formatDate(trace.start_time)}</p>
@@ -128,149 +115,149 @@ export default function TraceDetailPage() {
         )}
       </Card>
 
-      {/* Spans List */}
+      {/* Statistics */}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold mb-4">Statistics</h2>
+        <TraceStats trace={trace} spans={spans} />
+      </div>
+
+      {/* Execution Timeline */}
       <div>
-        <h2 className="text-2xl font-semibold mb-4">Spans ({spans.length})</h2>
+        <h2 className="text-2xl font-semibold mb-4">Execution Timeline</h2>
         {spans.length === 0 ? (
           <p className="text-muted-foreground">No spans found for this trace.</p>
         ) : (
-          <div className="space-y-4">
-            {spans.map((span) => (
-              <Card key={span.id} className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="font-semibold text-lg">{span.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Type: {span.type} | Span ID: {span.span_id}
-                    </p>
-                  </div>
-                  <Badge className={getStatusColor(span.status)}>
-                    {span.status.toUpperCase()}
-                  </Badge>
+          <div className="space-y-6">
+            {/* LLM Calls Section */}
+            {spans.some(s => s.llm_call) && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <span className="text-blue-600">🤖</span>
+                  LLM Calls ({spans.filter(s => s.llm_call).length})
+                </h3>
+                <div className="space-y-4">
+                  {spans
+                    .filter(s => s.llm_call)
+                    .map((span) => (
+                      <LLMCallCard
+                        key={span.id}
+                        llmCall={span.llm_call!}
+                        spanName={span.name}
+                      />
+                    ))}
                 </div>
+              </div>
+            )}
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-3">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Duration</p>
-                    <p className="text-sm">
-                      {span.duration_ms ? `${(span.duration_ms / 1000).toFixed(3)}s` : "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Started</p>
-                    <p className="text-sm">{formatDate(span.start_time)}</p>
-                  </div>
-                  {span.end_time && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Ended</p>
-                      <p className="text-sm">{formatDate(span.end_time)}</p>
-                    </div>
-                  )}
+            {/* Tool Calls Section */}
+            {spans.some(s => s.tool_call) && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <span className="text-green-600">🔧</span>
+                  Tool Calls ({spans.filter(s => s.tool_call).length})
+                </h3>
+                <div className="space-y-4">
+                  {spans
+                    .filter(s => s.tool_call)
+                    .map((span) => (
+                      <ToolCallCard
+                        key={span.id}
+                        toolCall={span.tool_call!}
+                        spanName={span.name}
+                        duration={span.duration_ms}
+                      />
+                    ))}
                 </div>
+              </div>
+            )}
 
-                {span.error && (
-                  <div className="mt-3 p-3 bg-red-50 rounded">
-                    <p className="text-sm font-semibold text-red-600">Error:</p>
-                    <p className="text-sm text-red-600">{span.error}</p>
-                  </div>
-                )}
+            {/* Other Spans Section */}
+            {spans.some(s => !s.llm_call && !s.tool_call) && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <span className="text-gray-600">⚙️</span>
+                  Other Operations ({spans.filter(s => !s.llm_call && !s.tool_call).length})
+                </h3>
+                <div className="space-y-4">
+                  {spans
+                    .filter(s => !s.llm_call && !s.tool_call)
+                    .map((span) => (
+                      <Card key={span.id} className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-semibold text-lg">{span.name}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Type: {span.type} | Span ID: {span.span_id}
+                            </p>
+                          </div>
+                          <Badge className={getStatusColor(span.status)}>
+                            {span.status.toUpperCase()}
+                          </Badge>
+                        </div>
 
-                {span.inputs && Object.keys(span.inputs).length > 0 && (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer text-sm font-semibold">
-                      Inputs
-                    </summary>
-                    <pre className="mt-2 p-3 bg-gray-50 rounded text-xs overflow-auto">
-                      {JSON.stringify(span.inputs, null, 2)}
-                    </pre>
-                  </details>
-                )}
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-3">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Duration</p>
+                            <p className="text-sm">
+                              {span.duration_ms ? `${(span.duration_ms / 1000).toFixed(3)}s` : "N/A"}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Started</p>
+                            <p className="text-sm">{formatDate(span.start_time)}</p>
+                          </div>
+                          {span.end_time && (
+                            <div>
+                              <p className="text-sm text-muted-foreground">Ended</p>
+                              <p className="text-sm">{formatDate(span.end_time)}</p>
+                            </div>
+                          )}
+                        </div>
 
-                {span.outputs && Object.keys(span.outputs).length > 0 && (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer text-sm font-semibold">
-                      Outputs
-                    </summary>
-                    <pre className="mt-2 p-3 bg-gray-50 rounded text-xs overflow-auto">
-                      {JSON.stringify(span.outputs, null, 2)}
-                    </pre>
-                  </details>
-                )}
+                        {span.error && (
+                          <div className="mt-3 p-3 bg-red-50 rounded">
+                            <p className="text-sm font-semibold text-red-600">Error:</p>
+                            <p className="text-sm text-red-600">{span.error}</p>
+                          </div>
+                        )}
 
-                {span.meta && Object.keys(span.meta).length > 0 && (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer text-sm font-semibold">
-                      Metadata
-                    </summary>
-                    <pre className="mt-2 p-3 bg-gray-50 rounded text-xs overflow-auto">
-                      {JSON.stringify(span.meta, null, 2)}
-                    </pre>
-                  </details>
-                )}
+                        {span.inputs && Object.keys(span.inputs).length > 0 && (
+                          <details className="mt-3">
+                            <summary className="cursor-pointer text-sm font-semibold">
+                              Inputs
+                            </summary>
+                            <pre className="mt-2 p-3 bg-gray-50 rounded text-xs overflow-auto">
+                              {JSON.stringify(span.inputs, null, 2)}
+                            </pre>
+                          </details>
+                        )}
 
-                {span.llm_call && (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer text-sm font-semibold">
-                      LLM Call Details
-                    </summary>
-                    <div className="mt-2 p-3 bg-blue-50 rounded text-sm space-y-2">
-                      <p><strong>Model:</strong> {span.llm_call.model_name}</p>
-                      <p><strong>Provider:</strong> {span.llm_call.provider}</p>
-                      <p><strong>Input Tokens:</strong> {span.llm_call.input_tokens}</p>
-                      <p><strong>Output Tokens:</strong> {span.llm_call.output_tokens}</p>
-                      <p><strong>Total Tokens:</strong> {span.llm_call.total_tokens}</p>
-                      <p><strong>Cost:</strong> {formatCost(span.llm_call.cost)}</p>
-                      {span.llm_call.prompt && (
-                        <details className="mt-2">
-                          <summary className="cursor-pointer font-semibold">Prompt</summary>
-                          <pre className="mt-2 p-2 bg-white rounded text-xs overflow-auto max-h-60">
-                            {span.llm_call.prompt}
-                          </pre>
-                        </details>
-                      )}
-                      {span.llm_call.response && (
-                        <details className="mt-2">
-                          <summary className="cursor-pointer font-semibold">Response</summary>
-                          <pre className="mt-2 p-2 bg-white rounded text-xs overflow-auto max-h-60">
-                            {span.llm_call.response}
-                          </pre>
-                        </details>
-                      )}
-                    </div>
-                  </details>
-                )}
+                        {span.outputs && Object.keys(span.outputs).length > 0 && (
+                          <details className="mt-3">
+                            <summary className="cursor-pointer text-sm font-semibold">
+                              Outputs
+                            </summary>
+                            <pre className="mt-2 p-3 bg-gray-50 rounded text-xs overflow-auto">
+                              {JSON.stringify(span.outputs, null, 2)}
+                            </pre>
+                          </details>
+                        )}
 
-                {span.tool_call && (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer text-sm font-semibold">
-                      Tool Call Details
-                    </summary>
-                    <div className="mt-2 p-3 bg-green-50 rounded text-sm space-y-2">
-                      <p><strong>Tool:</strong> {span.tool_call.tool_name}</p>
-                      {span.tool_call.tool_inputs && Object.keys(span.tool_call.tool_inputs).length > 0 && (
-                        <details className="mt-2">
-                          <summary className="cursor-pointer font-semibold">Inputs</summary>
-                          <pre className="mt-2 p-2 bg-white rounded text-xs overflow-auto">
-                            {JSON.stringify(span.tool_call.tool_inputs, null, 2)}
-                          </pre>
-                        </details>
-                      )}
-                      {span.tool_call.tool_outputs && Object.keys(span.tool_call.tool_outputs).length > 0 && (
-                        <details className="mt-2">
-                          <summary className="cursor-pointer font-semibold">Outputs</summary>
-                          <pre className="mt-2 p-2 bg-white rounded text-xs overflow-auto">
-                            {JSON.stringify(span.tool_call.tool_outputs, null, 2)}
-                          </pre>
-                        </details>
-                      )}
-                      {span.tool_call.error && (
-                        <p className="text-red-600"><strong>Error:</strong> {span.tool_call.error}</p>
-                      )}
-                    </div>
-                  </details>
-                )}
-              </Card>
-            ))}
+                        {span.meta && Object.keys(span.meta).length > 0 && (
+                          <details className="mt-3">
+                            <summary className="cursor-pointer text-sm font-semibold">
+                              Metadata
+                            </summary>
+                            <pre className="mt-2 p-3 bg-gray-50 rounded text-xs overflow-auto">
+                              {JSON.stringify(span.meta, null, 2)}
+                            </pre>
+                          </details>
+                        )}
+                      </Card>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

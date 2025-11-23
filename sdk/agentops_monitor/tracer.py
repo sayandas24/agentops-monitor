@@ -9,7 +9,10 @@ What it does:
 
 import uuid
 from datetime import datetime
-from .context import set_trace, set_spans, get_spans, set_calls, get_calls, get_trace
+from .context import (
+    set_trace, set_spans, get_spans, set_calls, get_calls, get_trace,
+    add_llm_call_to_context, add_tool_call_to_context
+)
 
 
 def new_trace(name, meta, tags=None):
@@ -35,7 +38,12 @@ def end_trace(end_time=None, meta=None):
         trace["end_time"] = datetime.utcnow().isoformat()
     if meta:
         trace["meta"].update(meta)
-    return trace
+    
+    # Get all collected data
+    spans = get_spans()
+    llm_calls, tool_calls = get_calls()
+    
+    return trace, spans, llm_calls, tool_calls
 
 
 def add_span(
@@ -81,3 +89,34 @@ def end_span(span_id, outputs=None, error=None, meta=None):
             if error:
                 span["error"] = error
             break
+
+
+def add_llm_call(span_id, model_name, provider, prompt=None, response=None, 
+                 input_tokens=0, output_tokens=0):
+    """Create an LLM call record associated with a span"""
+    if not span_id:
+        return
+    
+    llm_data = {
+        "model_name": model_name,
+        "provider": provider,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "prompt": prompt,
+        "response": response,
+    }
+    add_llm_call_to_context(span_id, llm_data)
+
+
+def add_tool_call(span_id, tool_name, tool_inputs, tool_outputs=None, error=None):
+    """Create a tool call record associated with a span"""
+    if not span_id:
+        return
+    
+    tool_data = {
+        "tool_name": tool_name,
+        "tool_inputs": tool_inputs,
+        "tool_outputs": tool_outputs or {},
+        "error": error,
+    }
+    add_tool_call_to_context(span_id, tool_data)

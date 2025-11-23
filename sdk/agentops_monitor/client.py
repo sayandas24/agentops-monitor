@@ -15,9 +15,27 @@ def send_trace(trace, spans, llm_calls, tool_calls, api_key):
         "llm_calls": llm_calls,
         "tool_calls": tool_calls,
     }
-    print(
-        f"trace: {trace} \n spans: {spans} \n llm_calls: {llm_calls} \n tool_calls: {tool_calls} \n  api_key: {api_key} \n"
-    )
+    print(f"\n=== AgentOps Monitor: Sending Trace ===")
+    print(f"Trace ID: {trace.get('trace_id')}")
+    print(f"Spans: {len(spans)}")
+    print(f"LLM Calls: {len(llm_calls)}")
+    print(f"Tool Calls: {len(tool_calls)}")
+    
+    if llm_calls:
+        print(f"\nLLM Call Details:")
+        for span_id, llm_data in llm_calls.items():
+            print(f"  - Span: {span_id}")
+            print(f"    Model: {llm_data.get('model_name')}")
+            print(f"    Tokens: {llm_data.get('input_tokens')} in / {llm_data.get('output_tokens')} out")
+            print(f"    Prompt length: {len(llm_data.get('prompt', ''))}")
+            print(f"    Response length: {len(llm_data.get('response', ''))}")
+    
+    if tool_calls:
+        print(f"\nTool Call Details:")
+        for span_id, tool_data in tool_calls.items():
+            print(f"  - Span: {span_id}")
+            print(f"    Tool: {tool_data.get('tool_name')}")
+    print(f"=====================================\n")
     try:
         resp = requests.post(DEFAULT_INGEST, json=payload, timeout=15)
         if resp.status_code != 200:
