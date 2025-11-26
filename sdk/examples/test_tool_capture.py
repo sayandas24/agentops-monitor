@@ -14,6 +14,12 @@ from agentops_monitor.adk.tool_wrapper import wrap_tool
 load_dotenv()
 AGENTOPS_API_KEY = os.getenv("AGENTOPS_API_KEY", "test_key")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+if not GOOGLE_API_KEY:
+    raise ValueError(
+        "GOOGLE_API_KEY not found in environment. Please create a .env file with your API key."
+    )
+
 os.environ["AGENTOPS_API_URL"] = "http://localhost:8000"
 os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
 
@@ -24,7 +30,7 @@ search_agent = Agent(
     name="SearchAgent",
     model="gemini-2.5-flash",
     tools=[wrapped_search],
-    instruction="You MUST use the google_search tool to answer questions. Always search before answering."
+    instruction="You MUST use the google_search tool to answer questions. Always search before answering.",
 )
 
 search_agent = monitor_agent(search_agent, AGENTOPS_API_KEY)
@@ -37,15 +43,17 @@ runner = monitor_runner(runner, AGENTOPS_API_KEY)
 user_id = "test_user"
 session_id = str(uuid.uuid4())
 
+
 async def create_session():
     await runner.session_service.create_session(
         user_id=user_id, session_id=session_id, app_name="SearchApp"
     )
 
+
 asyncio.run(create_session())
 
 # Ask a question that requires a search
-test_prompt = "What is the latest news about Python 3.13?"
+test_prompt = "How can i find the best courses for python, what are the available sources are there?"
 message = types.Content(parts=[types.Part(text=test_prompt)], role="user")
 
 print(f"Testing tool capture with prompt: {test_prompt}\n")
