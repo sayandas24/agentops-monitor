@@ -30,8 +30,10 @@ def _get_time_filter(time_range: str, start_date: Optional[datetime], end_date: 
     elif time_range == "last_30d":
         cutoff = now - timedelta(days=30)
         return Trace.start_time >= cutoff
-    elif time_range == "all_time":
-        return None  # No filter
+    elif time_range == "this_year":
+        # Get traces from start of current year to now
+        year_start = datetime(now.year, 1, 1)
+        return Trace.start_time >= year_start
     
     return None
 
@@ -57,6 +59,8 @@ def _determine_granularity(time_range: str, start_date: Optional[datetime], end_
         return "day"
     elif time_range == "last_30d":
         return "day"
+    elif time_range == "this_year":
+        return "day"
     elif time_range == "custom" and start_date and end_date:
         delta = end_date - start_date
         if delta.days <= 2:
@@ -65,8 +69,8 @@ def _determine_granularity(time_range: str, start_date: Optional[datetime], end_
             return "day"
         else:
             return "week"
-    else:  # all_time
-        return "week"
+    else:
+        return "day"
 
 
 def get_analytics_summary(
