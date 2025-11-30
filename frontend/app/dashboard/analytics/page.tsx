@@ -27,7 +27,7 @@ function AnalyticsPageContent() {
 
   // Filter state
   const [filters, setFilters] = useState<AnalyticsFilters>({
-    timeRange: 'this_year',
+    timeRange: 'last_24h',
     customStartDate: null,
     customEndDate: null,
     selectedProjects: [],

@@ -176,4 +176,30 @@ def monitor_agent(agent, api_key):
     agent.after_model_callback = after_model_wrapper
     agent.on_model_error_callback = on_error_wrapper
 
+    # Recursively monitor nested agents and tools
+    if hasattr(agent, "tools") and agent.tools:
+        from .tool_wrapper import wrap_tool
+        
+        for i, tool in enumerate(agent.tools):
+            # Check if this is an AgentTool (agent wrapped as a tool)
+            try:
+                from google.adk.tools.agent_tool import AgentTool
+                
+                if isinstance(tool, AgentTool):
+                    # Get the wrapped agent and monitor it recursively
+                    if hasattr(tool, "agent") or hasattr(tool, "_agent"):
+                        wrapped_agent = getattr(tool, "agent", None) or getattr(tool, "_agent", None)
+                        if wrapped_agent:
+                            # Recursively monitor the nested agent
+                            monitor_agent(wrapped_agent, api_key)
+                else:
+                    # Regular tool - wrap it
+                    wrap_tool(tool)
+            except (ImportError, AttributeError):
+                # If AgentTool is not available or tool doesn't match pattern, try wrapping as regular tool
+                try:
+                    wrap_tool(tool)
+                except Exception as e:
+                    print(f"[DEBUG] Could not wrap tool {tool}: {e}")
+
     return agent

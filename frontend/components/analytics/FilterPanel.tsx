@@ -50,7 +50,7 @@ export function FilterPanel({
     { value: 'last_24h', label: 'Last 24 hours' },
     { value: 'last_7d', label: 'Last 7 days' },
     { value: 'last_30d', label: 'Last 30 days' },
-    { value: 'this_year', label: 'This year' },
+    { value: 'all_time', label: 'This year' },
     { value: 'custom', label: 'Custom range' },
   ]
 
@@ -63,13 +63,13 @@ export function FilterPanel({
   }
 
   const handleClearFilters = () => {
-    onTimeRangeChange('this_year')
+    onTimeRangeChange('all_time')
     onCustomDateChange(null, null)
     onProjectsChange([])
   }
 
   const hasActiveFilters =
-    timeRange !== 'this_year' ||
+    timeRange !== 'all_time' ||
     selectedProjects.length > 0 ||
     customStartDate ||
     customEndDate
@@ -242,13 +242,13 @@ export function FilterPanel({
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-gray-600">Active filters:</span>
           
-          {timeRange !== 'this_year' && (
+          {timeRange !== 'all_time' && (
             <Badge variant="secondary" className="gap-1">
               {getTimeRangeLabel()}
               <X
                 className="h-3 w-3 cursor-pointer"
                 onClick={() => {
-                  onTimeRangeChange('this_year')
+                  onTimeRangeChange('all_time')
                   onCustomDateChange(null, null)
                 }}
               />

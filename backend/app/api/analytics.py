@@ -23,7 +23,7 @@ router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 @router.get("/summary", response_model=AnalyticsSummaryResponse)
 def get_analytics_summary(
-    time_range: str = Query("this_year", regex="^(last_24h|last_7d|last_30d|this_year|custom)$"),
+    time_range: str = Query("this_year", regex="^(last_24h|last_7d|last_30d|this_year|all_time|custom)$"),
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     project_ids: Optional[str] = None,  # Comma-separated project IDs
@@ -69,7 +69,7 @@ def get_analytics_summary(
 
 @router.get("/trends", response_model=TrendsResponse)
 def get_analytics_trends(
-    time_range: str = Query("this_year", regex="^(last_24h|last_7d|last_30d|this_year|custom)$"),
+    time_range: str = Query("this_year", regex="^(last_24h|last_7d|last_30d|this_year|all_time|custom)$"),
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     project_ids: Optional[str] = None,
@@ -114,7 +114,7 @@ def get_analytics_trends(
 
 @router.get("/models", response_model=ModelsResponse)
 def get_model_breakdown(
-    time_range: str = Query("this_year", regex="^(last_24h|last_7d|last_30d|this_year|custom)$"),
+    time_range: str = Query("this_year", regex="^(last_24h|last_7d|last_30d|this_year|all_time|custom)$"),
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     project_ids: Optional[str] = None,
@@ -154,7 +154,7 @@ def get_model_breakdown(
 
 @router.get("/top-traces", response_model=TopTracesResponse)
 def get_top_traces(
-    time_range: str = Query("this_year", regex="^(last_24h|last_7d|last_30d|this_year|custom)$"),
+    time_range: str = Query("this_year", regex="^(last_24h|last_7d|last_30d|this_year|all_time|custom)$"),
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     project_ids: Optional[str] = None,
@@ -203,7 +203,7 @@ def get_top_traces(
 @router.get("/export")
 def export_analytics(
     format: str = Query("csv", regex="^(csv|json)$"),
-    time_range: str = Query("this_year", regex="^(last_24h|last_7d|last_30d|this_year|custom)$"),
+    time_range: str = Query("this_year", regex="^(last_24h|last_7d|last_30d|this_year|all_time|custom)$"),
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     project_ids: Optional[str] = None,

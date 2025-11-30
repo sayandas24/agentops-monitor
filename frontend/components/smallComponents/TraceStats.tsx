@@ -8,9 +8,9 @@ interface TraceStatsProps {
 }
 
 export function TraceStats({ trace, spans }: TraceStatsProps) {
-  // Calculate statistics
-  const llmCallCount = spans.filter(s => s.llm_call).length;
-  const toolCallCount = spans.filter(s => s.tool_call).length;
+  // Calculate statistics - handle both formats (type field and llm_call/tool_call objects)
+  const llmCallCount = spans.filter(s => s.type === 'llm_call' || s.llm_call).length;
+  const toolCallCount = spans.filter(s => s.type === 'tool_call' || s.tool_call).length;
   const failedSpans = spans.filter(s => s.status === 'failed').length;
   
   const totalInputTokens = spans.reduce((sum, s) => 

@@ -14,13 +14,21 @@ def wrap_tool(tool):
         def wrapped_run(*args, **kwargs):
             from ..tracer import add_span, end_span, add_tool_call
             
-            tool_name = getattr(tool, 'name', tool.__class__.__name__)
+            # Extract tool name - try multiple attributes
+            tool_name = getattr(tool, 'name', None) or getattr(tool, '_name', None) or tool.__class__.__name__
+            tool_description = getattr(tool, 'description', None) or getattr(tool, '_description', '')
+            
             tool_inputs = {"args": str(args)[:500], "kwargs": str(kwargs)[:500]}
+            
+            # Include tool description in metadata
+            tool_meta = {}
+            if tool_description:
+                tool_meta['description'] = str(tool_description)[:200]
             
             span_id = add_span(
                 name=tool_name,
                 type="tool_call",
-                meta={},
+                meta=tool_meta,
                 inputs=tool_inputs
             )
             
@@ -58,13 +66,21 @@ def wrap_tool(tool):
         def wrapped_call(*args, **kwargs):
             from ..tracer import add_span, end_span, add_tool_call
             
-            tool_name = getattr(tool, 'name', tool.__class__.__name__)
+            # Extract tool name - try multiple attributes
+            tool_name = getattr(tool, 'name', None) or getattr(tool, '_name', None) or tool.__class__.__name__
+            tool_description = getattr(tool, 'description', None) or getattr(tool, '_description', '')
+            
             tool_inputs = {"args": str(args)[:500], "kwargs": str(kwargs)[:500]}
+            
+            # Include tool description in metadata
+            tool_meta = {}
+            if tool_description:
+                tool_meta['description'] = str(tool_description)[:200]
             
             span_id = add_span(
                 name=tool_name,
                 type="tool_call",
-                meta={},
+                meta=tool_meta,
                 inputs=tool_inputs
             )
             
