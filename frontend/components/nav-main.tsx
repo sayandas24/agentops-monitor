@@ -26,6 +26,7 @@ export function NavMain({
     title: string
     url: string
     icon: LucideIcon
+    iconColor?: string
     isActive?: boolean
     items?: {
       title: string
@@ -42,7 +43,7 @@ export function NavMain({
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={item.title}>
                 <a href={item.url}>
-                  <item.icon />
+                  <item.icon className={item.iconColor} />
                   <span>{item.title}</span>
                 </a>
               </SidebarMenuButton>

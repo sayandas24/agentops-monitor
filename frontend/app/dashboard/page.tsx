@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { tracesAPI } from "@/lib/api";
-import { Trace } from "@/types";
+import { tracesAPI, projectsAPI } from "@/lib/api";
+import { Trace, Project } from "@/types";
 import { formatCost, getStatusColor } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Copy, Check } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -30,6 +32,8 @@ export default function DashboardPage() {
 
   // Replace this with actual project ID from user projects or context
   const [projectId, setProjectId] = useState<string | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const [traces, setTraces] = useState<Trace[]>([]);
   const [loading, setLoading] = useState(false);
@@ -39,10 +43,24 @@ export default function DashboardPage() {
     // TODO: Get current project ID from context/props/login
     // For demo, set manually or redirect to projects page
     const storedProjectId = localStorage.getItem("currentProjectId");
+    const storedProjectName = localStorage.getItem("currentProjectName");
+    const storedApiKey = localStorage.getItem("currentProjectApiKey");
+    
     if (!storedProjectId) {
       router.push("/projects");
     } else {
       setProjectId(storedProjectId);
+      // Set project details from localStorage
+      if (storedProjectName && storedApiKey) {
+        setProject({
+          id: storedProjectId,
+          name: storedProjectName,
+          api_key: storedApiKey,
+          description: null,
+          is_active: true,
+          created_at: new Date().toISOString(),
+        });
+      }
     }
   }, [router]);
 
@@ -55,7 +73,7 @@ export default function DashboardPage() {
         const data = await tracesAPI.list(projectId);
         setTraces(data);
       } catch (err: any) {
-        setError(err.message || "Failed to load traces");
+        setError(err.message || "Failed to load data");
       } finally {
         setLoading(false);
       }
@@ -63,9 +81,60 @@ export default function DashboardPage() {
     fetchTraces();
   }, [projectId]);
 
+  // Mask API key - show first 8 and last 4 characters
+  const maskApiKey = (key: string) => {
+    if (key.length <= 12) return key;
+    return `${key.slice(0, 8)}${'•'.repeat(key.length - 12)}${key.slice(-4)}`;
+  };
+
+  const copyApiKey = async () => {
+    if (project?.api_key) {
+      await navigator.clipboard.writeText(project.api_key);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="mb-6 text-3xl font-bold">Project Traces</h1>
+
+      {/* API Key Display */}
+      {project && (
+        <Card className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-600 mb-1">API Key</p>
+              <div className="flex items-center gap-3">
+                <code className="text-sm font-mono bg-white px-3 py-1.5 rounded border border-blue-200">
+                  {maskApiKey(project.api_key)}
+                </code>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={copyApiKey}
+                  className="flex items-center gap-2"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4 text-green-600" />
+                      <span className="text-green-600">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+            <div className="text-sm text-gray-500">
+              <p className="font-medium">{project.name}</p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {loading && <p>Loading traces...</p>}
       {error && (

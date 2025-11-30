@@ -59,8 +59,10 @@ export default function ProjectsPage() {
   }
 
   // Handle selecting project (store in localStorage and navigate)
-  function selectProject(projectId: string) {
-    localStorage.setItem("currentProjectId", projectId);
+  function selectProject(project: Project) {
+    localStorage.setItem("currentProjectId", project.id);
+    localStorage.setItem("currentProjectName", project.name);
+    localStorage.setItem("currentProjectApiKey", project.api_key);
     router.push("/dashboard");
   }
 
@@ -110,7 +112,7 @@ export default function ProjectsPage() {
           <Card
             key={project.id}
             className="cursor-pointer p-4 hover:shadow-md"
-            onClick={() => selectProject(project.id)}
+            onClick={() => selectProject(project)}
           >
             <h3 className="text-lg font-semibold">{project.name}</h3>
             {project.description && (
