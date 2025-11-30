@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { projectsAPI } from "@/lib/api";
+import { projectsAPI } from "@/libs/api";
 import { Project } from "@/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

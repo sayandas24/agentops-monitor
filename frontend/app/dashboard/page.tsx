@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { tracesAPI, projectsAPI } from "@/lib/api";
+import { tracesAPI, projectsAPI } from "@/libs/api";
 import { Trace, Project } from "@/types";
-import { formatCost, getStatusColor } from "@/lib/utils";
+import { formatCost, getStatusColor } from "@/libs/utils";
 import { format, parseISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import { Badge } from "@/components/ui/badge";

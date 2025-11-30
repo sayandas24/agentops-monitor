@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { analyticsAPI } from '@/lib/api'
+import { analyticsAPI } from '@/libs/api'
 
 interface ExportButtonProps {
   filters: {

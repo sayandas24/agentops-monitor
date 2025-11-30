@@ -1,5 +1,5 @@
 import { LLMCall } from "@/types";
-import { formatCost } from "@/lib/utils";
+import { formatCost } from "@/libs/utils";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 

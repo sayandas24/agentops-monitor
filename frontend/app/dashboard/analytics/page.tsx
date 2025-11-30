@@ -12,7 +12,7 @@ import { ErrorBoundary } from '@/components/smallComponents/ErrorBoundary'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, RefreshCw } from 'lucide-react'
-import { analyticsAPI, projectsAPI } from '@/lib/api'
+import { analyticsAPI, projectsAPI } from '@/libs/api'
 import {
   AnalyticsSummary,
   TrendData,

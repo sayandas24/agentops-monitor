@@ -1,6 +1,6 @@
 import { Trace, Span } from "@/types";
 import { Card } from "@/components/ui/card";
-import { formatCost } from "@/lib/utils";
+import { formatCost } from "@/libs/utils";
 
 interface TraceStatsProps {
   trace: Trace;
