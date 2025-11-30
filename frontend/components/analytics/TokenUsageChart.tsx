@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { format, parseISO } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendData } from "@/types/analytics";
@@ -187,7 +188,14 @@ export function TokenUsageChart({
               }}
               labelFormatter={(label) => {
                 try {
-                  return format(parseISO(label as string), "PPpp");
+                  // Ensure timestamp is treated as UTC
+                  const utcString = (label as string).endsWith('Z') ? label as string : (label as string) + 'Z';
+                  const date = parseISO(utcString);
+                  // Format in IST with date and time
+                  const istTime = formatInTimeZone(date, 'Asia/Kolkata', 'PPpp');
+                  // Format UTC time explicitly
+                  const utcTime = formatInTimeZone(date, 'UTC', 'HH:mm');
+                  return `${istTime} (${utcTime} UTC)`;
                 } catch {
                   return label;
                 }

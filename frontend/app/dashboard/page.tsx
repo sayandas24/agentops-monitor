@@ -4,13 +4,29 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { tracesAPI } from "@/lib/api";
 import { Trace } from "@/types";
-import { formatDate, formatCost, getStatusColor } from "@/lib/utils";
+import { formatCost, getStatusColor } from "@/lib/utils";
+import { format, parseISO } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 
 export default function DashboardPage() {
   const router = useRouter();
+
+  // Helper function to format dates in IST with UTC
+  const formatDateIST = (dateString: string): string => {
+    try {
+      // Ensure timestamp is treated as UTC by appending 'Z' if not present
+      const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+      const date = parseISO(utcString);
+      const istTime = formatInTimeZone(date, 'Asia/Kolkata', 'MMM dd, yyyy HH:mm');
+      const utcTime = formatInTimeZone(date, 'UTC', 'HH:mm');
+      return `${istTime} IST (${utcTime} UTC)`;
+    } catch {
+      return dateString;
+    }
+  };
 
   // Replace this with actual project ID from user projects or context
   const [projectId, setProjectId] = useState<string | null>(null);
@@ -106,7 +122,7 @@ export default function DashboardPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Started</span>
-                  <span>{formatDate(trace.start_time)}</span>
+                  <span>{formatDateIST(trace.start_time)}</span>
                 </div>
 
                 <div className="flex justify-between">

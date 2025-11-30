@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { format, parseISO } from 'date-fns'
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz'
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -59,7 +60,14 @@ export function TopTracesTable({
 
   const formatDate = (dateString: string): string => {
     try {
-      return format(parseISO(dateString), 'MMM dd, yyyy HH:mm')
+      // Ensure timestamp is treated as UTC by appending 'Z' if not present
+      const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z'
+      const date = parseISO(utcString)
+      // Format in IST (Asia/Kolkata, UTC+5:30)
+      const istTime = formatInTimeZone(date, 'Asia/Kolkata', 'MMM dd, yyyy HH:mm')
+      // Format in UTC explicitly
+      const utcTime = formatInTimeZone(date, 'UTC', 'HH:mm')
+      return `${istTime} IST (${utcTime} UTC)`
     } catch {
       return dateString
     }

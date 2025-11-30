@@ -27,7 +27,7 @@ function AnalyticsPageContent() {
 
   // Filter state
   const [filters, setFilters] = useState<AnalyticsFilters>({
-    timeRange: 'all_time',
+    timeRange: 'this_year',
     customStartDate: null,
     customEndDate: null,
     selectedProjects: [],
@@ -45,12 +45,9 @@ function AnalyticsPageContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Cache state
-  const [lastFetchTime, setLastFetchTime] = useState<number>(0)
-  const CACHE_DURATION = useMemo(() => 5 * 60 * 1000, []) // 5 minutes
-
   // Debounce timer
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null)
+
 
   // Fetch projects on mount
   useEffect(() => {
@@ -67,13 +64,6 @@ function AnalyticsPageContent() {
 
   // Fetch analytics data
   const fetchAnalyticsData = useCallback(async (forceRefresh = false) => {
-    const now = Date.now()
-    
-    // Check cache
-    if (!forceRefresh && now - lastFetchTime < CACHE_DURATION) {
-      return
-    }
-
     setIsLoading(true)
     setError(null)
 
@@ -121,14 +111,13 @@ function AnalyticsPageContent() {
       setGranularity(trendsData.granularity)
       setModelBreakdown(modelsData.models)
       setTopTraces(tracesData.traces)
-      setLastFetchTime(now)
     } catch (err: any) {
       console.error('Failed to fetch analytics data:', err)
       setError(err.message || 'Failed to load analytics data')
     } finally {
       setIsLoading(false)
     }
-  }, [filters, lastFetchTime, CACHE_DURATION])
+  }, [filters])
 
   // Debounced fetch when filters change
   useEffect(() => {

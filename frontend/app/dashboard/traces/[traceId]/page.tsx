@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { tracesAPI } from "@/lib/api";
 import { Trace, Span } from "@/types";
-import { formatDate, formatCost, getStatusColor } from "@/lib/utils";
+import { formatCost, getStatusColor } from "@/lib/utils";
+import { format, parseISO } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +24,20 @@ export default function TraceDetailPage() {
   const params = useParams();
   const router = useRouter();
   const traceId = params.traceId as string;
+
+  // Helper function to format dates in IST with UTC
+  const formatDateIST = (dateString: string): string => {
+    try {
+      // Ensure timestamp is treated as UTC by appending 'Z' if not present
+      const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+      const date = parseISO(utcString);
+      const istTime = formatInTimeZone(date, 'Asia/Kolkata', 'MMM dd, yyyy HH:mm');
+      const utcTime = formatInTimeZone(date, 'UTC', 'HH:mm');
+      return `${istTime} IST (${utcTime} UTC)`;
+    } catch {
+      return dateString;
+    }
+  };
 
   const [traceDetail, setTraceDetail] = useState<TraceDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,11 +110,11 @@ export default function TraceDetailPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <p className="text-sm text-muted-foreground">Started</p>
-            <p>{formatDate(trace.start_time)}</p>
+            <p>{formatDateIST(trace.start_time)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Ended</p>
-            <p>{trace.end_time ? formatDate(trace.end_time) : "Running..."}</p>
+            <p>{trace.end_time ? formatDateIST(trace.end_time) : "Running..."}</p>
           </div>
         </div>
         {trace.tags.length > 0 && (
@@ -204,12 +220,12 @@ export default function TraceDetailPage() {
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Started</p>
-                            <p className="text-sm">{formatDate(span.start_time)}</p>
+                            <p className="text-sm">{formatDateIST(span.start_time)}</p>
                           </div>
                           {span.end_time && (
                             <div>
                               <p className="text-sm text-muted-foreground">Ended</p>
-                              <p className="text-sm">{formatDate(span.end_time)}</p>
+                              <p className="text-sm">{formatDateIST(span.end_time)}</p>
                             </div>
                           )}
                         </div>

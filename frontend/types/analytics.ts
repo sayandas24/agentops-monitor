@@ -52,7 +52,7 @@ export interface TopTrace {
 
 
 export interface AnalyticsFilters {
-  timeRange: 'last_24h' | 'last_7d' | 'last_30d' | 'all_time' | 'custom'
+  timeRange: 'last_24h' | 'last_7d' | 'last_30d' | 'this_year' | 'custom'
   customStartDate: Date | null
   customEndDate: Date | null
   selectedProjects: string[]
