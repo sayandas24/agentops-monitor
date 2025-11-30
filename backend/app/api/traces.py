@@ -1,25 +1,39 @@
 """
 What it does: Trace endpoints - ingest data from SDK, get traces for dashboard
 """
-from fastapi import APIRouter, Depends, HTTPException
+import logging
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from app.database import get_db
 from app.schemas.trace import TraceIngest, TraceResponse
 from app.crud import project as project_crud
 from app.crud import trace as trace_crud
+from app.config import settings
+
+logger = logging.getLogger(__name__)
+limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(prefix="/traces", tags=["traces"])
 
+
 @router.post("/ingest")
-def ingest_trace(data: TraceIngest, db: Session = Depends(get_db)):
+@limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
+def ingest_trace(request: Request, data: TraceIngest, db: Session = Depends(get_db)):
     """
     Ingest trace data from SDK
     Called by: SDK when agent executes
     """
+    logger.info(f"Receiving trace ingest from {request.client.host}")
+    
     # Validate API key
     project = project_crud.get_project_by_api_key(db, data.api_key)
     if not project:
+        logger.warning(f"Invalid API key attempt from {request.client.host}")
         raise HTTPException(status_code=401, detail="Invalid API key")
+    
+    logger.info(f"Ingesting trace {data.trace.trace_id} for project {project.id}")
     
     # Create trace
     trace = trace_crud.create_trace(db, project.id, data.trace)
@@ -39,7 +53,9 @@ def ingest_trace(data: TraceIngest, db: Session = Depends(get_db)):
     # Update trace metrics (sum tokens, costs)
     trace_crud.update_trace_metrics(db, data.trace.trace_id)
     
+    logger.info(f"Successfully ingested trace {trace.trace_id}")
     return {"success": True, "trace_id": trace.trace_id}
+
 
 @router.get("/{project_id}", response_model=list[TraceResponse])
 def get_traces(project_id: str, skip: int = 0, limit: int = 50, db: Session = Depends(get_db)):

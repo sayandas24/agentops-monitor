@@ -162,14 +162,14 @@ def monitor_agent(agent, api_key):
     # Wrap on_model_error_callback
     original_on_error = agent.on_model_error_callback
 
-    def on_error_wrapper(callback_context, error):
+    def on_error_wrapper(callback_context, error, **kwargs):
         """Called when the model encounters an error"""
         span_id = span_tracker.pop("current_span", None)
         if span_id:
             end_span(span_id, error=str(error))
 
         if original_on_error:
-            return original_on_error(callback_context, error)
+            return original_on_error(callback_context, error, **kwargs)
         return None
 
     agent.before_model_callback = before_model_wrapper

@@ -8,7 +8,7 @@ import uuid
 import asyncio
 import os
 from dotenv import load_dotenv
-from agentops_monitor import monitor_agent, monitor_runner
+from agentops_monitor import monitor_agent, monitor_runner, flush_traces
 
 load_dotenv()
 AGENTOPS_API_KEY = os.getenv("AGENTOPS_API_KEY", "test_key")
@@ -40,7 +40,7 @@ async def create_session():
 
 asyncio.run(create_session())
 
-test_prompt = "What is prime minister of India?"
+test_prompt = "What are the subjects in cs?"
 message = types.Content(parts=[types.Part(text=test_prompt)], role="user")
 
 responses = []
@@ -50,3 +50,9 @@ for event in runner.run(user_id=user_id, session_id=session_id, new_message=mess
             if hasattr(part, "text") and part.text:
                 print("Response:", part.text)
                 responses.append(part.text)
+print("\n\n\n", responses)
+
+# Wait for traces to be uploaded before script exits
+print("\nFlushing traces...")
+flush_traces(timeout=10)
+print("✅ All traces sent!")

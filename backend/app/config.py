@@ -14,6 +14,15 @@ class Settings(BaseSettings):
     # Gemini API
     GEMINI_API_KEY: str
     
+    # CORS Configuration
+    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8000"]
+    
+    # Rate Limiting
+    RATE_LIMIT_PER_MINUTE: int = 100
+    
+    # Logging
+    LOG_LEVEL: str = "INFO"
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

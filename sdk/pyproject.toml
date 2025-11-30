@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentops-monitor"
-version = "0.1.0"
+version = "0.1.2"
 description = "Monitoring SDK for AI agents built with Google ADK"
 readme = "README.md"
 requires-python = ">=3.8"
