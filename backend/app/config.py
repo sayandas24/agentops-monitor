@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str
     
     # CORS Configuration
-    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8000"]
+    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8000", "https://agentops-monitor.vercel.app"]
     
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = 100
