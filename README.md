@@ -6,7 +6,7 @@ Production-grade observability for Google ADK agents with **2 lines of code**.
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**🌐 Live Demo:** [agentops.vercel.app](https://agentops.vercel.app)
+**🌐 Live Demo:** [agentops-monitor.vercel.app](https://agentops-monitor.vercel.app)
 
 ---
 
@@ -284,7 +284,7 @@ result = process_data(my_data)
 
 Once your agent is running, open the dashboard:
 
-- **Live Demo**: [agentops.vercel.app](https://agentops.vercel.app)
+- **Live Demo**: [agentops-monitor.vercel.app](https://agentops-monitor.vercel.app)
 - **Local**: `http://localhost:3000`
 
 You'll see:
@@ -360,7 +360,6 @@ You'll see:
 - 🚀 [Deployment Guide](./DEPLOYMENT_GUIDE.md) - Production deployment instructions
 - 🐳 [Docker Setup](./DOCKER_SETUP_GUIDE.md) - Docker configuration details
 - 📦 [PyPI Publishing](./PYPI_PUBLISHING_GUIDE.md) - SDK publishing workflow
-- 🎯 [Project Overview](./PROJECT_OVERVIEW.md) - Complete system overview
 
 ---
 
